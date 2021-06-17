@@ -3,6 +3,7 @@ const app = express();
 const knex = require('knex');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const catalog = require('./routes/catalog');
 
 //initialize connection to postgres db 'ink'
 const db = knex({
@@ -17,6 +18,8 @@ const db = knex({
 
 app.use(cors());
 app.use(express.json())
+
+app.use('/catalog', catalog.catalogRoutes(db));
 
 
 app.listen(3005, ()=>{
