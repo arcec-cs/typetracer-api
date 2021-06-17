@@ -19,14 +19,27 @@ function catalogRoutes(db) { //function so we can inject db dependency
   });
   // '/authors' route returns a list of alphabetized authors and thier ids
   router
-  .get('/authors',(req, res)=> {
+  .route('/authors')
+  .get((req, res)=> {
     db('Authors')
     .select('Authors.author', 'Authors.id')
     .orderBy('Authors.author')
     .then(authorList => {
       res.status(200).json(authorList);
     })
-    .catch(err => res.status(404).json('could not retrieve authors id'));
+    .catch(err => res.status(404).json('could not retrieve authors'));
+  });
+  // '/categories' route returns a list of alphabetized categories and thier ids
+  router
+  .route('/categories')
+  .get((req, res)=> {
+    db('Categories')
+    .select('Categories.category', 'Categories.id')
+    .orderBy('Categories.category')
+    .then(categoryList => {
+      res.status(200).json(categoryList);
+    })
+    .catch(err => res.status(404).json('could not retrieve categories'));
   });
   
   return router;
