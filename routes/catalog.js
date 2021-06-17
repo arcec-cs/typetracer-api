@@ -41,6 +41,22 @@ function catalogRoutes(db) { //function so we can inject db dependency
     })
     .catch(err => res.status(404).json('could not retrieve categories'));
   });
+  // '/authors/:id' returns all of the specified authors Texts metadata like "/titles" route
+  router
+  .route('/authors/:id')
+  .get((req, res) => {
+    const {id} = req.params; 
+    db('Texts')
+    .where('author_id', '=', id)
+    .join('Authors', 'Authors.id', '=', 'Texts.author_id')
+    .join('Categories', 'Categories.id', '=', 'Texts.category_id')
+    .select('Texts.id', 'Texts.title', 'Authors.author', 'Categories.category', 'Texts.words', 'Texts.author_id', 'Texts.category_id' )
+    .orderBy('Texts.title')
+    .then(authorTexts => {
+      res.status(200).json(authorTexts);
+    })
+    .catch(err => res.status(404).json(`Could not retrieve author ${id} titles`));
+  });
   
   return router;
 }
