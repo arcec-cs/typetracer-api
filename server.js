@@ -5,6 +5,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const catalog = require('./routes/catalog');
 const text = require('./routes/text');
+const myTexts = require('./routes/myTexts')
 
 //initialize connection to postgres db 'ink'
 const db = knex({
@@ -22,6 +23,7 @@ app.use(express.json());
 
 app.use('/catalog', catalog.catalogRoutes(db));
 app.use('/text', text);
+app.use('/myTexts', myTexts.myTextsRoutes(db));
 
 
 app.listen(3005, ()=>{
