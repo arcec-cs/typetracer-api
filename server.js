@@ -7,6 +7,7 @@ const catalog = require('./routes/catalog');
 const text = require('./routes/text');
 const myTexts = require('./routes/myTexts');
 const register = require('./routes/register');
+const signin = require('./routes/signIn');
 
 //initialize connection to postgres db 'ink'
 const db = knex({
@@ -26,6 +27,7 @@ app.use('/catalog', catalog.catalogRoutes(db));
 app.use('/text', text);
 app.use('/myTexts', myTexts.myTextsRoutes(db));
 app.use('/register', register.registerRoute(db, bcrypt));
+app.use('/signIn', signin.signinRoute(db, bcrypt));
 
 
 app.listen(3005, ()=>{
