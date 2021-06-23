@@ -25,7 +25,24 @@ function myTextsRoutes(db) {
       })
     .catch(e => {console.log(e);res.status(404).json('uId was not specified')});
   });
-  
+
+  //Used to create a User_Texts record for :uID and :tId when logged in user access a book for the first time
+  router
+  .route('/:uId/:tId' )
+  .post((req, res) => { 
+    const lastAccessed = Math.ceil(Date.now() / 1000); //milli to sec, always get a full int; unix time to secs
+    const progressInit = JSON.stringify({page:0, para:0, sen:0, c_start:0}); //initial progress indexes
+    const {uId, tId} = req.params;
+    // init the User_Texts record
+    db('User_Texts')
+    .insert({u_id: uId, t_id: tId, progress: progressInit, last_accessed: lastAccessed })
+    .returning('progress')
+    .then(() => {
+      res.status(201).json(`text id ${tId} has been added your texts!`)
+    }) //could also fail if violates FK constraint, given a uId/tId that DNE
+    .catch(e => res.status(404).json(`text id ${tId} is already apart of myTexts`)); 
+  });
+
   //Used in TypeTracerApp to update progress
   router
   .route('/:uId/progress/:tId')
