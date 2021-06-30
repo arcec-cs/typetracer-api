@@ -1,7 +1,7 @@
 const express = require("express");
 
 // '/myText routes are used to preform restful operations on data related to the User_Texts table
-function signinRoute(db, bcrypt) {
+function signinRoute(db, bcrypt, jwt) {
   let router = express.Router();
   router
   .route('/')
@@ -18,10 +18,21 @@ function signinRoute(db, bcrypt) {
       const isValid = await bcrypt.compare(password, data[0].hash);
       if (isValid) {
         try {
-          const user = await db.select('id', 'name', 'created_at')
+          //get user info
+          const knexUser = await db.select('id', 'name', 'created_at')
           .from('Users')
           .where('email', '=', email);
-          res.json(user[0]);   
+          const user = knexUser[0];
+          // create payload with exp time
+          const timeValid  = 60 * 120; // 3 mins
+          const expires = Math.floor(Date.now() / 1000) + timeValid; // jwt exp in sec not miliSec
+          const payload ={
+            user: user,
+            exp: expires
+          } 
+          //send access Token
+          const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET)
+          res.json({accessToken: accessToken})  
         }catch { res.status(500).json('Internal Error'); } // db failure 
       } else res.status(400).json('wrong credentials'); // wrong password
       

@@ -1,7 +1,7 @@
 const express = require("express");
 
 // '/myText routes are used to preform restful operations on data related to the User_Texts table
-function registerRoute(db, bcrypt) {
+function registerRoute(db, bcrypt, jwt) {
   let router = express.Router();
   router
   .route('/')
@@ -27,8 +27,19 @@ function registerRoute(db, bcrypt) {
               email: loginEmail[0],
               name: name,
             })
-            .then(user => {
-              res.json(user[0]);
+            .then((knexUser) => {
+              //get user from knex arr
+              const user = knexUser[0];
+              // create payload with exp time
+              const timeValid  = 60 * 120; // 3 mins
+              const expires = Math.floor(Date.now() / 1000) + timeValid; // jwt exp in sec not miliSec
+              const payload ={
+                user: user,
+                exp: expires
+              } 
+              //send access Token
+              const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET)
+              res.json({accessToken: accessToken})  
             })
         })
         .then(trx.commit)
