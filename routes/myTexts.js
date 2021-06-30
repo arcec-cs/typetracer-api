@@ -39,8 +39,11 @@ function myTextsRoutes(db) {
     .returning('progress')
     .then(() => {
       res.status(201).json(`text id ${tId} has been added your texts!`)
-    }) //could also fail if violates FK constraint, given a uId/tId that DNE
-    .catch(e => res.status(404).json(`text id ${tId} is already apart of myTexts`)); 
+    })//status code 200 on dup key for route is to ensure that there is a record
+    .catch(e => {
+      const ecDuplicateKey = 23505; //e.code is a string
+      if(e.code == ecDuplicateKey) res.status(200).json(`text id ${tId} is already apart of myTexts`)
+      else res.status(500).json(`Interal Error!`)}); 
   });
 
   //Used in TypeTracerApp to update progress
