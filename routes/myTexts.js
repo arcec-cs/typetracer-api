@@ -12,18 +12,23 @@ function myTextsRoutes(db) {
     db('User_Texts') //get text ids that belong to user uid 
     .select('User_Texts.t_id', 'User_Texts.last_accessed')
     .where({u_id: uId})
-    .orderBy('User_Texts.last_accessed', 'desc') //unix time in sec, dec bc 
+    .orderBy('t_id', 'asc') // so both querys output will be the same 
     .then(userTextIds => { // userTextsIds is an array of objs
-      const idsArr = userTextIds.map( obj => obj.t_id)
+      const idsArr = userTextIds.map( obj => obj.t_id) // get t_id array
       db('Texts') //get text meta data of each id specified in idsArr
         .whereIn('Texts.id', idsArr) //In has no order, need to find another way to return last_accessed desc.
         .join('Authors', 'Authors.id', '=', 'Texts.author_id')
         .join('Categories', 'Categories.id', '=', 'Texts.category_id')
         .select('Texts.id', 'Texts.title', 'Authors.author', 'Texts.words', 'Categories.category')
-        .then(texts => res.status(200).json(texts))
-        .catch(e=> res.status(500).json('internal error'));//should always return atlest an empty array
+        .orderBy('Texts.id', 'asc')
+        .then(texts => {
+           texts.forEach((entry,ind) => entry.lastAccessed = userTextIds[ind].last_accessed);// append timestamps
+           texts.sort((a, b) => (a.lastAccessed < b.lastAccessed) ? 1 : -1); //sort by time decending
+           res.status(200).json(texts);
+        })
+        .catch(e => res.status(500).json('internal error'));//should always return atlest an empty array
       })
-    .catch(e => {console.log(e);res.status(404).json('uId was not specified')});
+    .catch(e => res.status(404).json('uId was not specified'));
   });
 
   //Used to create a User_Texts record for :uID and :tId when logged in user access a book for the first time
@@ -67,7 +72,7 @@ function myTextsRoutes(db) {
     db('User_Texts') 
     .update({last_accessed: lastAccessed})//unix time into seconds
     .where({u_id: uId, t_id: tId})
-    .then(a => console.log('updated time')).catch(console.log(`Couldnt update ${uId} access time for ${tId}`));
+    .then(a => console.log('updated time')).catch(()=>console.log(`Couldnt update ${uId} access time for ${tId}`));
     //get and send progress
     db('User_Texts')
     .select('progress')
