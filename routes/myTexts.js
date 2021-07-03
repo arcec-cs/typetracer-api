@@ -10,7 +10,7 @@ function myTextsRoutes(db) {
   .get((req, res) => {
     const {uId} = req.params;
     db('User_Texts') //get text ids that belong to user uid 
-    .select('User_Texts.t_id', 'User_Texts.last_accessed')
+    .select('User_Texts.t_id', 'User_Texts.last_accessed', 'progress')
     .where({u_id: uId})
     .orderBy('t_id', 'asc') // so both querys output will be the same 
     .then(userTextIds => { // userTextsIds is an array of objs
@@ -19,10 +19,13 @@ function myTextsRoutes(db) {
         .whereIn('Texts.id', idsArr) //In has no order, need to find another way to return last_accessed desc.
         .join('Authors', 'Authors.id', '=', 'Texts.author_id')
         .join('Categories', 'Categories.id', '=', 'Texts.category_id')
-        .select('Texts.id', 'Texts.title', 'Authors.author', 'Texts.words', 'Categories.category')
+        .select('Texts.id', 'Texts.title', 'Authors.author', 'Texts.pages', 'Categories.category')
         .orderBy('Texts.id', 'asc')
         .then(texts => {
-           texts.forEach((entry,ind) => entry.lastAccessed = userTextIds[ind].last_accessed);// append timestamps
+           texts.forEach((entry,ind) => { // append lastAccessed/ page progress
+             entry.lastAccessed = userTextIds[ind].last_accessed;
+             entry.pageProgress = userTextIds[ind].progress.page;
+            });
            texts.sort((a, b) => (a.lastAccessed < b.lastAccessed) ? 1 : -1); //sort by time decending
            res.status(200).json(texts);
         })
