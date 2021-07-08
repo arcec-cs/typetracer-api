@@ -6,10 +6,10 @@ function authenticateToken(req, res, next){
   if (token == null) return res.sendStatus(401) //check for token
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403)
+    if (err) return res.sendStatus(403);
+    req.uId = user.user.id;//get user id for routes  
     next();
   })
 }
-
 
 module.exports.authenticateToken = authenticateToken; 
