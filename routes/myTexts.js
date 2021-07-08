@@ -29,9 +29,9 @@ function myTextsRoutes(db) {
            texts.sort((a, b) => (a.lastAccessed < b.lastAccessed) ? 1 : -1); //sort by time decending
            res.status(200).json(texts);
         })
-        .catch(e => res.status(500).json('internal error'));//should always return atlest an empty array
+        .catch(e => res.status(500).json('Internal Error!'));//should always return atlest an empty array
       })
-    .catch(e => res.status(404).json('uId was not specified'));
+    .catch(e => res.status(500).json('Internal Error!'));// uId should always be valid from verified access token
   });
 
   //Used to create a User_Texts record for :uID and :tId when logged in user access a book for the first time
@@ -49,9 +49,11 @@ function myTextsRoutes(db) {
     .then(() => {
       res.status(201).json(`text id ${tId} has been added your texts!`)
     })//status code 200 on dup key for route is to ensure that there is a record
-    .catch(e => {
+    .catch(e => { 
       const ecDuplicateKey = 23505; //e.code is a string
-      if(e.code == ecDuplicateKey) res.status(200).json(`text id ${tId} is already apart of myTexts`)
+      const fKeyViolation = 23503;
+      if(e.code == ecDuplicateKey) res.status(200).json(`Text id ${tId} is already apart of myTexts`);
+      else if (e.code == fKeyViolation) res.status(400).json(`Text id ${tId} does not exist`);
       else res.status(500).json(`Interal Error!`)}); 
   });
 
