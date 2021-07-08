@@ -1,3 +1,4 @@
+const e = require("express");
 const express = require("express");
 
 // '/myTexts routes are used to preform restful operations on data related to the User_Texts table
@@ -68,27 +69,45 @@ function myTextsRoutes(db) {
     db('User_Texts')
     .update({progress: progress})
     .where({u_id: uId, t_id: tId})
-    .then(() => res.status(200).json('Success, progress was updated'))
-    .catch(e => res.status(404).json('unable to update user-texts'));
+    .then(code => {
+      if(code == 1) res.status(201).json(`Text Id ${tId}'s progress was updated`); //knex returns 1 on success
+      else throw Error(-1);//knex returns 0 on failure, need to throw our own error
+    })
+    .catch(e => {
+      console.log(e)
+      if(e.message == -1) res.status(400).json(`Unable to update. Text Id ${tId} id not apart of myTexts`); //uid is auth so bad tId
+      else res.status(500).json(`Internal Error! Unable to update progress for Text Id ${tId}`);
+    });
   })
   //used to get progress when starting typetracer app 
   .get((req, res) => { 
     const lastAccessed = Math.ceil(Date.now() / 1000); //milli to sec, always get a full int
     const {tId} = req.params;
     const uId = req.uId; 
-    //log access time
+    //update lastAccessed
     db('User_Texts') 
     .update({last_accessed: lastAccessed})//unix time into seconds
     .where({u_id: uId, t_id: tId})
-    .then(a => console.log('updated time')).catch(()=>console.log(`Couldnt update ${uId} access time for ${tId}`));
+    .then(code => {
+      if(code == 1) return 0; //knex returns 1 on success
+      else throw Error(-1);//knex returns 0 on failure, need to throw our own error
+    })
+    .catch(e => {
+      console.log(e)
+      if(e.message == -1) res.status(400).json(`Unable to get progress. Text Id ${tId} id not apart of myTexts`); //uid is auth so bad tId
+      else res.status(500).json(`Internal Error!, unable to get progress for Text Id ${tId}`); // we want access time to be logged
+    });
     //get and send progress
     db('User_Texts')
     .select('progress')
     .where({u_id: uId, t_id: tId})
     .then(progress => {
-      res.status(200).json(progress[0].progress) // returns {page:, para:, sen:, c_start}
+      if (progress) res.status(200).json(progress[0].progress) // returns {page:, para:, sen:, c_start}
+      else throw Error(-1);
     })
-    .catch(e => res.status(404).json('unable to get progress'));
+    .catch(e => {
+      res.status(500).json(`Internal Error! Unable to get progress for Text Id ${tId}`);
+    });
   });
 
 
