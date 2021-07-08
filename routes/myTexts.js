@@ -8,8 +8,7 @@ function myTextsRoutes(db) {
   router
   .route('/')
   .get((req, res) => {
-    // const {uId} = req.params;
-    const uId = req.uId;
+    const uId = req.uId; 
     db('User_Texts') //get text ids that belong to user uid 
     .select('User_Texts.t_id', 'User_Texts.last_accessed', 'progress')
     .where({u_id: uId})
@@ -42,7 +41,7 @@ function myTextsRoutes(db) {
     const lastAccessed = Math.ceil(Date.now() / 1000); //milli to sec, always get a full int; unix time to secs
     const progressInit = JSON.stringify({page:1, para:0, sen:0, c_start:0}); //initial progress indexes
     const {tId} = req.params;
-    const uId = req.uId;
+    const uId = req.uId; 
     // init the User_Texts record
     db('User_Texts')
     .insert({u_id: uId, t_id: tId, progress: progressInit, last_accessed: lastAccessed })
@@ -60,8 +59,8 @@ function myTextsRoutes(db) {
   router
   .route('/progress/:tId')
   .put((req, res) => {
-    const {tId} = req.params;
-    const uId = req.uId;  
+    const {tId} = req.params; 
+    const uId = req.uId; 
     const {progress} = req.body;
     //update progress
     db('User_Texts')
@@ -74,7 +73,7 @@ function myTextsRoutes(db) {
   .get((req, res) => { 
     const lastAccessed = Math.ceil(Date.now() / 1000); //milli to sec, always get a full int
     const {tId} = req.params;
-    const uId = req.uId;
+    const uId = req.uId; 
     //log access time
     db('User_Texts') 
     .update({last_accessed: lastAccessed})//unix time into seconds
