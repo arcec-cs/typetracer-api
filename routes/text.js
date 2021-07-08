@@ -1,11 +1,11 @@
 const express = require("express");
 let router = express.Router();
 const AWS = require('aws-sdk');
-const keys = require('../config/config');
+// const keys = require('../config/config');
 
-const BUCKET_NAME = keys.BUCKET_NAME;
-const ACCESS_KEY_ID = keys.ACCESS_KEY_ID;
-const SECRET_ACCESS_KEY = keys.SECRET_ACCESS_KEY;
+const BUCKET_NAME = process.env.BUCKET_NAME;
+const ACCESS_KEY_ID = process.env.ACCESS_KEY_ID;
+const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY;
 
 router // grabs ${id}.json from AWS s3 using the AWS SDK
   .route('/:id')
