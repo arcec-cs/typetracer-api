@@ -6,9 +6,10 @@ function myTextsRoutes(db) {
   
   //Gets user texts data for the specified user id, used on MyTexts page
   router
-  .route('/:uId')
+  .route('/')
   .get((req, res) => {
-    const {uId} = req.params;
+    // const {uId} = req.params;
+    const uId = req.uId;
     db('User_Texts') //get text ids that belong to user uid 
     .select('User_Texts.t_id', 'User_Texts.last_accessed')
     .where({u_id: uId})
@@ -33,11 +34,12 @@ function myTextsRoutes(db) {
 
   //Used to create a User_Texts record for :uID and :tId when logged in user access a book for the first time
   router
-  .route('/:uId/:tId' )
+  .route('/:tId' )
   .post((req, res) => { 
     const lastAccessed = Math.ceil(Date.now() / 1000); //milli to sec, always get a full int; unix time to secs
     const progressInit = JSON.stringify({page:1, para:0, sen:0, c_start:0}); //initial progress indexes
-    const {uId, tId} = req.params;
+    const {tId} = req.params;
+    const uId = req.uId;
     // init the User_Texts record
     db('User_Texts')
     .insert({u_id: uId, t_id: tId, progress: progressInit, last_accessed: lastAccessed })
@@ -53,9 +55,10 @@ function myTextsRoutes(db) {
 
   //Used in TypeTracerApp to update progress
   router
-  .route('/:uId/progress/:tId')
+  .route('/progress/:tId')
   .put((req, res) => {
-    const {uId, tId} = req.params; 
+    const {tId} = req.params;
+    const uId = req.uId;  
     const {progress} = req.body;
     //update progress
     db('User_Texts')
@@ -67,7 +70,8 @@ function myTextsRoutes(db) {
   //used to get progress when starting typetracer app 
   .get((req, res) => { 
     const lastAccessed = Math.ceil(Date.now() / 1000); //milli to sec, always get a full int
-    const {uId, tId} = req.params;
+    const {tId} = req.params;
+    const uId = req.uId;
     //log access time
     db('User_Texts') 
     .update({last_accessed: lastAccessed})//unix time into seconds
