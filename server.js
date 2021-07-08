@@ -11,15 +11,13 @@ const myTexts = require('./routes/myTexts');
 const register = require('./routes/register');
 const signin = require('./routes/signIn');
 const authT = require('./auth/authenticateToken')
-
+const pgConfigSSL = {rejectUnauthorized: false};
 //initialize connection to postgres db 'ink'
 const db = knex({
   client: 'pg',
   connection: {
-    host : '127.0.0.1',
-    user : 'postgres',
-    password : 'test',
-    database : 'typetracer'
+    connectionString: process.env.DATABASE_URL,
+    ssl: pgConfigSSL,
   }
 });
 
