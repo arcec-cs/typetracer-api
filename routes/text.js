@@ -1,7 +1,6 @@
 const express = require("express");
 let router = express.Router();
 const AWS = require('aws-sdk');
-// const keys = require('../config/config');
 
 const BUCKET_NAME = process.env.BUCKET_NAME;
 const ACCESS_KEY_ID = process.env.ACCESS_KEY_ID;
@@ -37,8 +36,7 @@ router // grabs ${id}.json from AWS s3 using the AWS SDK
         res.status(200).json(textJson);
 
       }catch(e){
-        console.log('error:', e);
-        res.status(400).json(`Could not retrieve text ${id}`);
+        res.status(500).json(`Could not retrieve text ${id}`);
       }
     })();
   });
