@@ -33,6 +33,6 @@ app.use('/register', register.registerRoute(db, bcrypt, jwt));
 app.use('/signIn', signin.signinRoute(db, bcrypt, jwt));
 
 
-app.listen(3005, ()=>{
-  console.log('app is running on port 3005');
+app.listen(process.env.PORT, ()=>{
+  console.log(`app is running on port ${process.env.PORT}`);
 })
