@@ -1,21 +1,19 @@
-const { response } = require("express");
 const express = require("express");
 
 function catalogRoutes(db) { //function so we can inject db dependency
   let router = express.Router();
-  // '/titles' route returns all Texts title, author, aategory and Ids for each so we may use them to make request form the fronend
+  // '/titles' route returns every Text's title, author, category and Id
   router
   .route('/titles')
   .get((req, res) => {
     db('Texts')
     .join('Authors', 'Authors.id', '=', 'Texts.author_id')
     .join('Categories', 'Categories.id', '=', 'Texts.category_id')
-    .select('Texts.id', 'Texts.title', 'Authors.author', 'Categories.category', 'Texts.pages', 'Texts.author_id', 'Texts.category_id')
+    .select('Texts.title', 'Authors.author', 'Categories.category', 'Texts.pages',
+    'Texts.id' , 'Texts.author_id', 'Texts.category_id')
     .orderBy('Texts.title')
-    .then(texts => {
-      res.status(200).json(texts);
-    })
-    .catch(err => res.status(404).json('could not retrieve catalog'));
+    .then(texts => res.status(200).json(texts))//route not dynamic, can only fail on internal error
+    .catch(e => res.status(500).json('Internal Error: could not retrieve catalog titles'));
   });
   // '/authors' route returns a list of alphabetized authors and thier ids
   router
@@ -24,10 +22,8 @@ function catalogRoutes(db) { //function so we can inject db dependency
     db('Authors')
     .select('Authors.author', 'Authors.id')
     .orderBy('Authors.author')
-    .then(authorList => {
-      res.status(200).json(authorList);
-    })
-    .catch(err => res.status(404).json('could not retrieve authors'));
+    .then(authorList => res.status(200).json(authorList))//route not dynamic, can only fail on internal error
+    .catch(e => res.status(500).json('Internal Error: could not retrieve authors'));
   });
   // '/categories' route returns a list of alphabetized categories and thier ids
   router
@@ -36,10 +32,8 @@ function catalogRoutes(db) { //function so we can inject db dependency
     db('Categories')
     .select('Categories.category', 'Categories.id')
     .orderBy('Categories.category')
-    .then(categoryList => {
-      res.status(200).json(categoryList);
-    })
-    .catch(err => res.status(404).json('could not retrieve categories'));
+    .then(categoryList => res.status(200).json(categoryList))//route not dynamic, can only fail on internal error
+    .catch(e => res.status(500).json('Internal Error: could not retrieve categories'));
   });
   // '/authors/:id' returns all of the specified author's Texts metadata like "/titles" route
   router
