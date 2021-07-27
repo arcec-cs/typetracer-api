@@ -44,28 +44,40 @@ function catalogRoutes(db) { //function so we can inject db dependency
     .where('author_id', '=', id)
     .join('Authors', 'Authors.id', '=', 'Texts.author_id')
     .join('Categories', 'Categories.id', '=', 'Texts.category_id')
-    .select('Texts.id', 'Texts.title', 'Authors.author', 'Categories.category', 'Texts.pages', 'Texts.author_id', 'Texts.category_id' )
+    .select('Texts.title', 'Authors.author', 'Categories.category', 'Texts.pages',
+    'Texts.id' , 'Texts.author_id', 'Texts.category_id')
     .orderBy('Texts.title')
-    .then(authorTexts => {
-      res.status(200).json(authorTexts);
-    })
-    .catch(err => res.status(404).json(`Could not retrieve author ${id} titles`));
+    .then(authorTexts => res.status(200).json(authorTexts)) //will return empty if id is int and not in catalog
+    .catch(e => {
+      const ecInvalidInputForInt = '22P02'; //e.code is a string
+      if (e.code == ecInvalidInputForInt){ 
+        res.status(400)
+        .json(`TypeError: Param :id must be of type Integer. Could not retrieve texts' metadata for author id ${id}.`);
+      }
+      else res.status(500).json(`Interal Error: Could not retrieve author id ${id} texts' metadata.`) 
+    });
   });
    // '/categories/:id' returns all of the specified categories' Texts metadata like "/titles" route
    router
    .route('/categories/:id')
    .get((req, res) => {
-     const {id} = req.params;
-     db('Texts')
-     .where('category_id', '=', id)
-     .join('Authors', 'Authors.id', '=', 'Texts.author_id')
-     .join('Categories', 'Categories.id', '=', 'Texts.category_id')
-     .select('Texts.id', 'Texts.title', 'Authors.author', 'Categories.category', 'Texts.pages', 'Texts.author_id', 'Texts.category_id' )
-     .orderBy('Texts.title')
-     .then(categoryTexts => {
-       res.status(200).json(categoryTexts);
-      })
-     .catch(err => res.status(404).json(`Could not retrieve category ${id} titles`));
+      const {id} = req.params;
+      db('Texts')
+      .where('category_id', '=', id)
+      .join('Authors', 'Authors.id', '=', 'Texts.author_id')
+      .join('Categories', 'Categories.id', '=', 'Texts.category_id')
+      .select('Texts.title', 'Authors.author', 'Categories.category', 'Texts.pages',
+      'Texts.id' , 'Texts.author_id', 'Texts.category_id')
+      .orderBy('Texts.title')
+      .then(categoryTexts => res.status(200).json(categoryTexts)) //will return empty if id is int and not in catalog 
+      .catch(e => {
+        const ecInvalidInputForInt = '22P02'; //e.code is a string
+        if (e.code == ecInvalidInputForInt) {
+          res.status(400)
+          .json(`TypeError: Param :id must be of type Integer. Could not retrieve texts' metadata for category id ${id}.`);
+        }
+        else res.status(500).json(`Interal Error: Could not retrieve category id ${id} texts' metadata.`) 
+      });
    });
    
   return router;
